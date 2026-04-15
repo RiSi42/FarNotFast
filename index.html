@@ -288,6 +288,7 @@
 
     .filter-group {
       margin-top: 10px;
+      min-width: 0;
     }
 
     .filter-label {
@@ -299,6 +300,8 @@
     }
 
     .chip-row {
+      min-width: 0;
+      max-width: 100%;
       display: flex;
       gap: 8px;
       padding: 0 16px 4px;
@@ -344,6 +347,7 @@
       width: min(100%, 1040px);
       margin: 0 auto;
       padding: 16px;
+      min-width: 0;
     }
 
     .section-title {
@@ -358,6 +362,7 @@
     .stack {
       display: grid;
       gap: 14px;
+      min-width: 0;
     }
 
     .card {
@@ -478,6 +483,7 @@
 
     .segmented {
       width: 100%;
+      min-width: 0;
       padding: 4px;
       display: grid;
       grid-template-columns: repeat(var(--segments, 2), minmax(0, 1fr));
@@ -493,6 +499,7 @@
     }
 
     .segmented button {
+      min-width: 0;
       min-height: 42px;
       padding: 0 5px;
       border-radius: 6px;
@@ -622,9 +629,11 @@
     .badge-grid {
       display: grid;
       gap: 12px;
+      min-width: 0;
     }
 
     .badge-card {
+      min-width: 0;
       padding: 14px;
       display: grid;
       grid-template-columns: 44px minmax(0, 1fr);
@@ -650,6 +659,7 @@
 
     .badge-title {
       margin: 0;
+      min-width: 0;
       display: flex;
       justify-content: space-between;
       gap: 10px;
@@ -658,6 +668,11 @@
       line-height: 1.05;
       font-weight: 800;
       text-transform: uppercase;
+    }
+
+    .badge-title span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
     .badge-winner {
@@ -700,24 +715,30 @@
     }
 
     .badge-stat {
+      min-width: 0;
       color: var(--accent);
       font-family: "Barlow Condensed", Barlow, sans-serif;
       font-size: 20px;
       font-weight: 800;
+      text-align: right;
+      overflow-wrap: anywhere;
       white-space: nowrap;
     }
 
     .heatmap {
       display: grid;
       gap: 14px;
+      min-width: 0;
     }
 
     .month-grid {
       display: grid;
       gap: 12px;
+      min-width: 0;
     }
 
     .month-card {
+      min-width: 0;
       padding: 12px;
       background: var(--card);
       border: 1px solid var(--border);
@@ -735,6 +756,7 @@
 
     .days-head,
     .days-grid {
+      min-width: 0;
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 4px;
@@ -750,8 +772,10 @@
     }
 
     .day-cell {
+      min-width: 0;
       width: 100%;
       aspect-ratio: 1;
+      padding: 0;
       border-radius: 4px;
       background: var(--card2);
       border: 1px solid rgba(255,255,255,0.04);
@@ -883,10 +907,14 @@
 
       .badge-title {
         font-size: 18px;
+        align-items: flex-start;
+        flex-wrap: wrap;
       }
 
       .badge-stat {
         font-size: 17px;
+        text-align: left;
+        white-space: normal;
       }
 
       .month-card {
