@@ -518,6 +518,20 @@
       min-height: 320px;
     }
 
+    @media (max-width: 719px) {
+      .chart-wrap {
+        height: calc(100dvh - 270px);
+        min-height: 220px;
+      }
+    }
+
+    @media (max-height: 500px) {
+      .chart-wrap {
+        height: calc(100dvh - 130px);
+        min-height: 180px;
+      }
+    }
+
     .summary {
       margin-bottom: 12px;
       display: grid;
@@ -668,6 +682,21 @@
       color: var(--text2);
       font-size: 14px;
       font-weight: 500;
+    }
+
+    .badge-help {
+      display: inline-grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--text3);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 0 0 20px;
     }
 
     .badge-stat {
@@ -831,6 +860,49 @@
       font-weight: 600;
     }
 
+    @media (max-width: 719px) {
+      .main {
+        padding: 12px;
+      }
+
+      .badge-grid {
+        gap: 10px;
+      }
+
+      .badge-card {
+        padding: 12px;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      .badge-emoji {
+        width: 38px;
+        height: 38px;
+        font-size: 20px;
+      }
+
+      .badge-title {
+        font-size: 18px;
+      }
+
+      .badge-stat {
+        font-size: 17px;
+      }
+
+      .month-card {
+        padding: 8px;
+      }
+
+      .days-grid,
+      .days-head {
+        gap: 2px;
+      }
+
+      .day-cell {
+        border-radius: 3px;
+      }
+    }
+
     @media (min-width: 720px) {
       .main {
         padding: 22px;
@@ -962,16 +1034,16 @@
       ['heatmap', '📅', 'Heatmap']
     ];
     const BADGES = [
-      { id: 'komye', emoji: '🎤', name: 'Komye', gag: 'God tier, non si discute' },
-      { id: 'postino', emoji: '📬', name: 'Il Postino', gag: 'Consegna in qualsiasi condizione' },
-      { id: 'sisifo', emoji: '⛰️', name: 'Sisifo', gag: 'Su e giù. Su e giù. Su e giù.' },
-      { id: 'forrest', emoji: '🏃', name: 'Forrest', gag: 'Non si è mai fermato a chiedere perché' },
-      { id: 'fred', emoji: '🦕', name: 'Fred', gag: 'Ha pedalato con i piedi di un dinosauro' },
-      { id: 'pianop', emoji: '🐢', name: 'Piano Piano', gag: 'Il paesaggio si gode meglio lenti' },
-      { id: 'yolo', emoji: '💥', name: 'YOLO', gag: 'Tutto in una volta sola' },
-      { id: 'rambo', emoji: '🎯', name: 'Rambo', gag: 'Vuole solo soffrire' },
-      { id: 'roccia', emoji: '🪨', name: 'La Roccia', gag: 'Come un orologio svizzero, ma in bici' },
-      { id: 'ghost', emoji: '👻', name: 'Il Fantasma', gag: 'Gli atleti giurano di averlo visto al bar' }
+      { id: 'komye', emoji: '🎤', name: 'Komye', gag: 'God tier, non si discute', help: 'Chi ha la media km/h più alta' },
+      { id: 'postino', emoji: '📬', name: 'Il Postino', gag: 'Consegna in qualsiasi condizione', help: 'Chi ha pedalato più km in totale' },
+      { id: 'sisifo', emoji: '⛰️', name: 'Sisifo', gag: 'Su e giù. Su e giù. Su e giù.', help: 'Chi ha accumulato più dislivello in totale' },
+      { id: 'forrest', emoji: '🏃', name: 'Forrest', gag: 'Non si è mai fermato a chiedere perché', help: 'Chi ha fatto più uscite' },
+      { id: 'fred', emoji: '🦕', name: 'Fred', gag: 'Ha pedalato con i piedi di un dinosauro', help: 'Chi ha fatto meno uscite' },
+      { id: 'pianop', emoji: '🐢', name: 'Piano Piano', gag: 'Il paesaggio si gode meglio lenti', help: 'Chi ha la media km/h più bassa (min. 2 uscite)' },
+      { id: 'yolo', emoji: '💥', name: 'YOLO', gag: 'Tutto in una volta sola', help: 'Chi ha fatto la singola uscita più lunga in km' },
+      { id: 'rambo', emoji: '🎯', name: 'Rambo', gag: 'Vuole solo soffrire', help: 'Chi ha il rapporto dislivello/km più alto in una singola uscita' },
+      { id: 'roccia', emoji: '🪨', name: 'La Roccia', gag: 'Come un orologio svizzero, ma in bici', help: 'Chi pedala sempre le stesse distanze, il più costante (min. 3 uscite)' },
+      { id: 'ghost', emoji: '👻', name: 'Il Fantasma', gag: 'Gli atleti giurano di averlo visto al bar', help: 'Chi non ha fatto nessuna uscita nel periodo' }
     ];
 
     const now = new Date();
@@ -991,7 +1063,7 @@
       },
       badgeYear: currentYear,
       badgeMonth: currentMonth,
-      badgeMode: 'month',
+      badgeMode: 'year',
       logPage: 0,
       hmYear: currentYear,
       hmAthlete: 'tutti',
@@ -1275,11 +1347,11 @@
       dom.filterCount.classList.toggle('hidden', activeCount === 0);
 
       dom.periodFilters.innerHTML = [
-        ['month', 'Mese'],
-        ['year', 'Anno'],
+        ['all', 'Sempre'],
         ['12m', 'Ultimi 12 mesi'],
-        ['all', 'Sempre']
-      ].map(([value, label]) => `<button type="button" class="${state.filters.period === value ? 'is-active' : ''}" data-period="${value}">${label}</button>`).join('');
+        ['year', 'Anno'],
+        ['month', 'Mese']
+      ].map(([value, label]) => `<button type="button" class="${state.filters.period === value ? 'is-active' : ''}" data-period="${value}">${escapeHtml(label)}</button>`).join('');
       dom.yearFilters.closest('.filter-group').classList.toggle('hidden', !['month', 'year'].includes(state.filters.period));
       dom.monthFilters.closest('.filter-group').classList.toggle('hidden', state.filters.period !== 'month');
       dom.yearFilters.innerHTML = getYears().map(year => chipHtml(year, state.filters.year === year, { type: 'year', value: year })).join('');
@@ -1373,9 +1445,9 @@
       dom.main.innerHTML = `
         <h2 class="section-title">Classifica</h2>
         <div class="dashboard-grid stack">
-          ${championsCard()}
-          ${topCard('Top 5 anno corrente', state.data.filter(row => row.anno === currentYear))}
           ${topCard('Top 5 mese corrente', state.data.filter(row => row.anno === currentYear && row.mese === currentMonth))}
+          ${topCard('Top 5 anno corrente', state.data.filter(row => row.anno === currentYear))}
+          ${championsCard()}
         </div>
       `;
     }
@@ -1491,11 +1563,7 @@
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } },
-            tooltip: {
-              callbacks: {
-                label: context => `${context.dataset.label}: ${formatKm(context.parsed.y)} km`
-              }
-            }
+            tooltip: { enabled: false }
           },
           scales: {
             x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true } },
@@ -1582,7 +1650,7 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } },
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: context => {
@@ -1715,10 +1783,10 @@
         <h2 class="section-title">Badge</h2>
         <div class="stack">
           <div class="segmented" style="--segments:4" role="group" aria-label="Periodo badge">
-            <button type="button" class="${state.badgeMode === 'month' ? 'is-active' : ''}" data-badge-mode="month">Mese</button>
-            <button type="button" class="${state.badgeMode === 'year' ? 'is-active' : ''}" data-badge-mode="year">Anno</button>
-            <button type="button" class="${state.badgeMode === '12m' ? 'is-active' : ''}" data-badge-mode="12m">Ultimi 12 mesi</button>
             <button type="button" class="${state.badgeMode === 'all' ? 'is-active' : ''}" data-badge-mode="all">Sempre</button>
+            <button type="button" class="${state.badgeMode === '12m' ? 'is-active' : ''}" data-badge-mode="12m">Ultimi 12 mesi</button>
+            <button type="button" class="${state.badgeMode === 'year' ? 'is-active' : ''}" data-badge-mode="year">Anno</button>
+            <button type="button" class="${state.badgeMode === 'month' ? 'is-active' : ''}" data-badge-mode="month">Mese</button>
           </div>
           ${state.badgeMode === 'month' ? `
             <div class="filter-group">
@@ -1737,6 +1805,9 @@
           </div>
         </div>
       `;
+      dom.main.querySelectorAll('.badge-help').forEach(button => {
+        button.addEventListener('click', () => alert(button.dataset.help));
+      });
       dom.main.querySelectorAll('[data-badge-mode]').forEach(button => {
         button.addEventListener('click', () => {
           state.badgeMode = button.dataset.badgeMode;
@@ -1859,7 +1930,7 @@
         <article class="badge-card">
           <div class="badge-emoji">${badge.emoji}</div>
           <div class="badge-body">
-            <h3 class="badge-title"><span>${escapeHtml(badge.name)}</span><span class="badge-stat">${escapeHtml(badge.stat)}</span></h3>
+            <h3 class="badge-title"><span>${escapeHtml(badge.name)} <button class="badge-help" type="button" data-help="${escapeAttr(badge.help)}" aria-label="Info">?</button></span><span class="badge-stat">${escapeHtml(badge.stat)}</span></h3>
             <div class="badge-winner">
               <span class="dot" style="background:${escapeAttr(color)}"></span>
               <span>${escapeHtml(names)}</span>
