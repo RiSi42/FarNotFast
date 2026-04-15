@@ -11,10 +11,11 @@ permissions:
   pages: write
   id-token: write
   actions: write
+  deployments: write
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -47,8 +48,6 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for all workflows to settle
-        run: sleep 300
       - name: Cleanup old runs, deployments and artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,10 +55,10 @@ jobs:
           CURRENT_RUN: ${{ github.run_id }}
           CURRENT_SHA: ${{ github.sha }}
         run: |
-          # Delete ALL workflow runs except current (across all workflows)
+          # Delete completed workflow runs except current. Leave queued/in-progress runs alone.
           page=1
           while true; do
-            ids=$(gh api "repos/${REPO}/actions/runs?page=${page}&per_page=100" --jq '.workflow_runs[].id' 2>/dev/null)
+            ids=$(gh api "repos/${REPO}/actions/runs?page=${page}&per_page=100" --jq '.workflow_runs[] | select(.status == "completed") | .id' 2>/dev/null)
             [ -z "$ids" ] && break
             echo "$ids" | while read id; do
               if [ "$id" != "${CURRENT_RUN}" ]; then
@@ -77,9 +76,12 @@ jobs:
               first=false
               echo "Keeping deployment $id"
             else
-              gh api --method POST "repos/${REPO}/deployments/$id/statuses" --field state=inactive 2>/dev/null || true
-              gh api --method DELETE "repos/${REPO}/deployments/$id" 2>/dev/null || true
-              echo "Deleted deployment $id"
+              if gh api --method POST "repos/${REPO}/deployments/$id/statuses" --field state=inactive 2>/dev/null \
+                && gh api --method DELETE "repos/${REPO}/deployments/$id" 2>/dev/null; then
+                echo "Deleted deployment $id"
+              else
+                echo "Skipped deployment $id"
+              fi
             fi
           done
 

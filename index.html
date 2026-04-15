@@ -1018,6 +1018,7 @@
   <script>
     const CSV_URL = '__CSV_URL__';
     const EXPECTED_HASH = '7aa87bec09c88c8c6b50e912117053c70fd5ec635df7ea649a786a7789c34702';
+    const AUTH_STORAGE_KEY = 'farnotfast:auth';
     const PALETTE = [
       '#FC4C02', '#3FA7D6', '#59CD90', '#FAC05E',
       '#E84855', '#B67FFF', '#44BBA4', '#FF6B9D',
@@ -1121,6 +1122,9 @@
         render();
       });
       renderNav();
+      if (hasSavedLogin()) {
+        unlockApp();
+      }
     });
 
     async function handleLogin(event) {
@@ -1134,6 +1138,12 @@
         dom.loginPanel.classList.add('shake');
         return;
       }
+      dom.password.value = '';
+      rememberLogin();
+      await unlockApp();
+    }
+
+    async function unlockApp() {
       dom.login.classList.add('hidden');
       dom.loading.classList.remove('hidden');
       try {
@@ -1145,6 +1155,22 @@
       } catch (error) {
         dom.loading.classList.add('hidden');
         showError(error);
+      }
+    }
+
+    function hasSavedLogin() {
+      try {
+        return sessionStorage.getItem(AUTH_STORAGE_KEY) === EXPECTED_HASH;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function rememberLogin() {
+      try {
+        sessionStorage.setItem(AUTH_STORAGE_KEY, EXPECTED_HASH);
+      } catch (error) {
+        // If storage is unavailable, the login still works for the current load.
       }
     }
 
