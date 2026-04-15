@@ -1282,25 +1282,15 @@
         media: parseNum(getCell(row, columns.media)),
         controllo,
         duplicate,
-        isDuplicate: isDuplicateFlag(duplicate) || isControlDuplicateFlag(controllo)
+        isDuplicate: isDuplicateFlag(duplicate)
       };
     }
 
+    // Duplicate column values from spreadsheet formula:
+    // "A" = duplicate (Controllo key already seen), "0" = unique, "R" = excluded (no data)
     function isDuplicateFlag(value) {
-      const raw = String(value || '').trim();
-      if (!raw) return false;
-      const normalized = normalizeHeader(raw);
-      if (['false', 'falso', 'no', 'n', '0', 'ok', 'unique', 'unico'].includes(normalized)) return false;
-      if (['true', 'vero', 'si', 'yes', 'y', '1', 'x', 'dup', 'duplicate', 'duplicato', 'duplicata', 'doppio'].includes(normalized)) return true;
-      const numeric = parseNum(raw);
-      if (Number.isFinite(numeric) && numeric > 1) return true;
-      return normalized.includes('duplic') || normalized.includes('doppio');
-    }
-
-    function isControlDuplicateFlag(value) {
-      const normalized = normalizeHeader(value);
-      if (!normalized) return false;
-      return normalized.includes('duplic') || normalized.includes('doppio');
+      const v = String(value || '').trim().toUpperCase();
+      return v === 'A' || v === 'R';
     }
 
     function parseNum(s) {
