@@ -1,0 +1,87 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Inject secrets
+        env:
+          CSV_URL: ${{ secrets.CSV_URL }}
+        run: sed -i "s|__CSV_URL__|${CSV_URL}|g" index.html
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  cleanup:
+    needs: deploy
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for all workflows to settle
+        run: sleep 300
+      - name: Cleanup old runs, deployments and artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN: ${{ github.run_id }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          # Delete ALL workflow runs except current (across all workflows)
+          page=1
+          while true; do
+            ids=$(gh api "repos/${REPO}/actions/runs?page=${page}&per_page=100" --jq '.workflow_runs[].id' 2>/dev/null)
+            [ -z "$ids" ] && break
+            echo "$ids" | while read id; do
+              if [ "$id" != "${CURRENT_RUN}" ]; then
+                gh api --method DELETE "repos/${REPO}/actions/runs/$id" 2>/dev/null || true
+                echo "Deleted run $id"
+              fi
+            done
+            page=$((page + 1))
+          done
+
+          # Delete all deployments except the most recent one
+          first=true
+          gh api "repos/${REPO}/deployments" --jq '.[].id' 2>/dev/null | while read id; do
+            if [ "$first" = true ]; then
+              first=false
+              echo "Keeping deployment $id"
+            else
+              gh api --method POST "repos/${REPO}/deployments/$id/statuses" --field state=inactive 2>/dev/null || true
+              gh api --method DELETE "repos/${REPO}/deployments/$id" 2>/dev/null || true
+              echo "Deleted deployment $id"
+            fi
+          done
+
+          # Delete all artifacts
+          gh api "repos/${REPO}/actions/artifacts" --jq '.artifacts[].id' 2>/dev/null | while read id; do
+            gh api --method DELETE "repos/${REPO}/actions/artifacts/$id" 2>/dev/null || true
+            echo "Deleted artifact $id"
+          done
