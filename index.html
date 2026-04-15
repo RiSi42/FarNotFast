@@ -1181,13 +1181,48 @@
       const headers = parsed.data[0] || [];
       const columns = getColumnIndexes(headers);
       const allRows = parsed.data.slice(1).map(row => parseRow(row, columns)).filter(Boolean);
-      const rows = allRows.filter(row => !row.isDuplicate && !isExcludedAthlete(row.nome));
+      const afterFlags = allRows.filter(row => !row.isDuplicate && !isExcludedAthlete(row.nome));
+      const rows = deduplicateAuto(afterFlags);
       if (!rows.length) throw new Error('CSV vuoto');
       state.duplicatesExcluded = allRows.length - rows.length;
       state.data = rows.sort((a, b) => b.date - a.date);
       buildAthletes();
       setDefaultYears();
       dom.rowCount.textContent = formatInt(state.data.length);
+    }
+
+    function deduplicateAuto(rows) {
+      const NEAR_DUP_THRESHOLD = 0.30;
+      const MIN_SPEED_KMH = 9;
+      const seen = new Map();
+      const result = [];
+      for (const row of rows) {
+        if (row.media > 0 && row.media < MIN_SPEED_KMH) continue;
+        const groupKey = row.dateStr + '|' + row.nome;
+        if (!seen.has(groupKey)) {
+          seen.set(groupKey, []);
+        }
+        const group = seen.get(groupKey);
+        const isDup = group.some(existing => isNearDuplicate(existing, row, NEAR_DUP_THRESHOLD));
+        if (!isDup) {
+          group.push(row);
+          result.push(row);
+        }
+      }
+      return result;
+    }
+
+    function isNearDuplicate(a, b, threshold) {
+      if (a.distanza === b.distanza && a.dislivello === b.dislivello && a.media === b.media) return true;
+      const diffDist = fieldPctDiff(a.distanza, b.distanza);
+      const diffMedia = fieldPctDiff(a.media, b.media);
+      return Math.max(diffDist, diffMedia) <= threshold;
+    }
+
+    function fieldPctDiff(va, vb) {
+      if (va === 0 && vb === 0) return 0;
+      if (va === 0 || vb === 0) return 1;
+      return Math.abs(va - vb) / Math.min(va, vb);
     }
 
     function getColumnIndexes(headers) {
