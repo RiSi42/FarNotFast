@@ -28,7 +28,10 @@ jobs:
       - name: Inject secrets
         env:
           CSV_URL: ${{ secrets.CSV_URL }}
-        run: sed -i "s|__CSV_URL__|${CSV_URL}|g" index.html
+        run: |
+          test -n "$CSV_URL"
+          perl -0pi -e 's/\Q__CSV_URL__\E/$ENV{CSV_URL}/g' index.html
+          ! grep -q "__CSV_URL__" index.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
