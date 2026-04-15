@@ -914,8 +914,9 @@
         gap: 14px;
       }
 
-      .dashboard-grid .card:first-child {
-        grid-row: span 2;
+      .dashboard-grid .card:nth-child(3) {
+        grid-column: 2;
+        grid-row: 1 / span 2;
       }
 
       .badge-grid {
@@ -1064,7 +1065,7 @@
       },
       badgeYear: currentYear,
       badgeMonth: currentMonth,
-      badgeMode: 'year',
+      badgeMode: 'month',
       logPage: 0,
       hmYear: currentYear,
       hmAthlete: 'tutti',
