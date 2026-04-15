@@ -1286,11 +1286,9 @@
       };
     }
 
-    // Duplicate column values from spreadsheet formula:
-    // "A" = duplicate (Controllo key already seen), "0" = unique, "R" = excluded (no data)
+    // Duplicate column: "A" = duplicate (Controllo key already seen), "0" = unique, "R" = no data
     function isDuplicateFlag(value) {
-      const v = String(value || '').trim().toUpperCase();
-      return v === 'A' || v === 'R';
+      return String(value || '').trim().toUpperCase() === 'A';
     }
 
     function parseNum(s) {
