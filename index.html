@@ -1286,9 +1286,10 @@
       };
     }
 
-    // Duplicate column: "A" = duplicate (Controllo key already seen), "0" = unique, "R" = no data
+    // Duplicate column: "A" = exact dup, "S" = slow (<9km/h), "N" = near-dup, "0" = unique, "R" = no dplus
     function isDuplicateFlag(value) {
-      return String(value || '').trim().toUpperCase() === 'A';
+      const v = String(value || '').trim().toUpperCase();
+      return v === 'A' || v === 'S' || v === 'N';
     }
 
     function parseNum(s) {
