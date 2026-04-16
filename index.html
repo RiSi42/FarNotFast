@@ -2437,8 +2437,8 @@
       `;
       const filterHtml = athletesWithDups.length > 1 ? `
         <div id="karenAthletes" class="chip-row">
-          ${chipHtml('Tutti', state.karenAthlete === 'tutti', { karenAthlete: 'tutti' })}
-          ${athletesWithDups.map(name => chipHtml(name, state.karenAthlete === name, { karenAthlete: name, color: state.athleteColorMap[name] })).join('')}
+          ${chipHtml('Tutti', state.karenAthlete === 'tutti', { 'karen-athlete': 'tutti' })}
+          ${athletesWithDups.map(name => chipHtml(name, state.karenAthlete === name, { 'karen-athlete': name, color: state.athleteColorMap[name] })).join('')}
         </div>
       ` : '';
       if (!allGroups.length) {
