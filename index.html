@@ -818,7 +818,7 @@
       min-height: calc(64px + env(safe-area-inset-bottom));
       padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(7, 1fr);
       gap: 3px;
       background: rgba(28,28,30,0.94);
       border-top: 1px solid var(--border);
@@ -828,6 +828,7 @@
     .nav-btn {
       min-width: 0;
       min-height: 52px;
+      padding: 4px 2px;
       display: grid;
       align-content: center;
       justify-items: center;
@@ -835,12 +836,20 @@
       border-radius: 8px;
       background: transparent;
       color: var(--text3);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
+      overflow: hidden;
+    }
+
+    .nav-btn > span:not(.nav-btn__icon) {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .nav-btn__icon {
-      font-size: 20px;
+      font-size: 18px;
       line-height: 1;
     }
 
@@ -965,6 +974,174 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
+
+    .karen-intro {
+      padding: 12px 14px;
+      margin: 0 0 14px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .karen-intro strong { color: var(--text); }
+
+    .karen-group {
+      margin-bottom: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .karen-group__header {
+      width: 100%;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      font-weight: 600;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      letter-spacing: 0.3px;
+    }
+
+    .karen-group__meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: Barlow, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+    }
+
+    .karen-group__count {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .karen-group__body {
+      padding: 0 14px 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .karen-row {
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: var(--card2);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px 12px;
+      align-items: center;
+    }
+
+    .karen-row--kept {
+      background: rgba(89,205,144,0.1);
+      border: 1px solid rgba(89,205,144,0.28);
+    }
+
+    .karen-row__check {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .karen-row__mark {
+      font-size: 18px;
+      line-height: 1;
+      color: var(--ok);
+    }
+
+    .karen-row__main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      align-items: baseline;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    .karen-row__stat {
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.3px;
+    }
+
+    .karen-row__stat small {
+      font-weight: 500;
+      font-size: 12px;
+      color: var(--text2);
+      margin-left: 2px;
+    }
+
+    .karen-row__meta {
+      width: 100%;
+      font-family: Barlow, sans-serif;
+      font-size: 12px;
+      color: var(--text2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .karen-row__flag {
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(252,76,2,0.18);
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .karen-row__pending {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .karen-empty {
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--text2);
+      font-size: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(92px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 100;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: rgba(44,44,46,0.96);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.38);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .toast--ok { border-color: rgba(89,205,144,0.55); }
+    .toast--error { border-color: rgba(255,69,58,0.6); }
   </style>
 </head>
 <body>
@@ -1046,6 +1223,9 @@
 
   <script>
     const CSV_URL = '__CSV_URL__';
+    const OVERRIDES_CSV_URL = CSV_URL.replace(/sheet=[^&]*/, 'sheet=karen_overrides');
+    const OVERRIDES_URL = '__OVERRIDES_URL__';
+    const OVERRIDES_TIMEOUT_MS = 8000;
     const EXPECTED_HASH = '7aa87bec09c88c8c6b50e912117053c70fd5ec635df7ea649a786a7789c34702';
     const AUTH_STORAGE_KEY = 'farnotfast:auth';
     const PALETTE = [
@@ -1061,7 +1241,8 @@
       ['uscite', '🫧', 'Uscite'],
       ['log', '📋', 'Log'],
       ['badge', '🏅', 'Badge'],
-      ['heatmap', '📅', 'Heatmap']
+      ['heatmap', '📅', 'Heatmap'],
+      ['karen', '💅', 'Karen']
     ];
     const BADGES = [
       { id: 'komye', emoji: '🎤', name: 'Komye', gag: 'God tier, non si discute', help: 'Chi ha la media km/h più alta' },
@@ -1081,6 +1262,10 @@
     const currentMonth = now.getMonth() + 1;
     const state = {
       data: [],
+      allRows: [],
+      overrideMap: new Map(),
+      pendingOverrides: new Set(),
+      openKarenGroups: new Set(),
       athletes: [],
       athleteColorMap: {},
       tab: 'classifica',
@@ -1228,56 +1413,78 @@
     }
 
     async function loadData() {
-      const response = await fetch(CSV_URL, { cache: 'no-store' });
-      if (!response.ok) throw new Error('Google Sheet non raggiungibile');
-      const csv = await response.text();
-      const parsed = Papa.parse(csv, { header: false, skipEmptyLines: true });
+      const [mainResult, overridesResult] = await Promise.allSettled([
+        fetch(CSV_URL, { cache: 'no-store' }).then(r => {
+          if (!r.ok) throw new Error('Google Sheet non raggiungibile');
+          return r.text();
+        }),
+        fetch(OVERRIDES_CSV_URL, { cache: 'no-store' }).then(r => r.ok ? r.text() : '')
+      ]);
+      if (mainResult.status === 'rejected') throw mainResult.reason;
+      const parsed = Papa.parse(mainResult.value, { header: false, skipEmptyLines: true });
       if (parsed.errors.length) throw new Error('CSV non leggibile');
       const headers = parsed.data[0] || [];
       const columns = getColumnIndexes(headers);
       const allRows = parsed.data.slice(1).map(row => parseRow(row, columns)).filter(Boolean);
-      const afterFlags = allRows.filter(row => !row.isDuplicate && !isExcludedAthlete(row.nome));
-      const rows = deduplicateAuto(afterFlags);
-      if (!rows.length) throw new Error('CSV vuoto');
-      state.duplicatesExcluded = allRows.length - rows.length;
-      state.data = rows.sort((a, b) => b.date - a.date);
+      await assignRowKeys(allRows);
+      state.allRows = allRows;
+      state.overrideMap = overridesResult.status === 'fulfilled'
+        ? parseOverrides(overridesResult.value)
+        : new Map();
+      rebuildActiveRows();
+      if (!state.data.length) throw new Error('CSV vuoto');
       buildAthletes();
       setDefaultYears();
       dom.rowCount.textContent = formatInt(state.data.length);
     }
 
-    function deduplicateAuto(rows) {
-      const NEAR_DUP_THRESHOLD = 0.30;
-      const MIN_SPEED_KMH = 9;
-      const seen = new Map();
-      const result = [];
-      for (const row of rows) {
-        if (row.media > 0 && row.media < MIN_SPEED_KMH) continue;
-        const groupKey = row.dateStr + '|' + row.nome;
-        if (!seen.has(groupKey)) {
-          seen.set(groupKey, []);
-        }
-        const group = seen.get(groupKey);
-        const isDup = group.some(existing => isNearDuplicate(existing, row, NEAR_DUP_THRESHOLD));
-        if (!isDup) {
-          group.push(row);
-          result.push(row);
-        }
+    function rebuildActiveRows() {
+      const filtered = state.allRows.filter(row => {
+        if (isExcludedAthlete(row.nome)) return false;
+        const override = state.overrideMap.get(row.key);
+        if (override !== undefined) return override;
+        return !row.isDuplicate;
+      });
+      state.duplicatesExcluded = state.allRows.length - filtered.length;
+      state.data = filtered.slice().sort((a, b) => b.date - a.date);
+    }
+
+    async function assignRowKeys(rows) {
+      const sorted = rows.slice().sort((a, b) => {
+        if (a.date - b.date !== 0) return a.date - b.date;
+        return a.nome.localeCompare(b.nome);
+      });
+      const hashCounts = new Map();
+      for (const row of sorted) {
+        const raw = `${row.dateStr}|${row.nome.trim()}|${row.distanza}|${row.dislivello}|${row.media}`;
+        const hash = await sha256(raw);
+        const seq = hashCounts.get(hash) || 0;
+        hashCounts.set(hash, seq + 1);
+        row.key = `${hash}#${seq}`;
       }
-      return result;
     }
 
-    function isNearDuplicate(a, b, threshold) {
-      if (a.distanza === b.distanza && a.dislivello === b.dislivello && a.media === b.media) return true;
-      const diffDist = fieldPctDiff(a.distanza, b.distanza);
-      const diffMedia = fieldPctDiff(a.media, b.media);
-      return Math.max(diffDist, diffMedia) <= threshold;
-    }
-
-    function fieldPctDiff(va, vb) {
-      if (va === 0 && vb === 0) return 0;
-      if (va === 0 || vb === 0) return 1;
-      return Math.abs(va - vb) / Math.min(va, vb);
+    function parseOverrides(csvText) {
+      const map = new Map();
+      if (!csvText) return map;
+      const parsed = Papa.parse(csvText, { header: false, skipEmptyLines: true });
+      if (!parsed.data || !parsed.data.length) return map;
+      const rows = parsed.data.slice(1);
+      const withTs = rows
+        .map(row => {
+          const key = String(row[0] || '').trim();
+          if (!key) return null;
+          const includedRaw = String(row[1] || '').trim().toLowerCase();
+          const included = includedRaw === 'true' || includedRaw === '1' || includedRaw === 'vero';
+          const timestamp = String(row[2] || '').trim();
+          return { key, included, timestamp };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+      for (const entry of withTs) {
+        map.set(entry.key, entry.included);
+      }
+      return map;
     }
 
     function getColumnIndexes(headers) {
@@ -1341,7 +1548,7 @@
       };
     }
 
-    // Duplicate column: "A" = exact dup, "S" = slow (<9km/h), "N" = near-dup, "0" = unique, "R" = no dplus
+    // Duplicate column: "A" = exact dup, "S" = slow (<7km/h), "N" = near-dup, "0" = unique
     function isDuplicateFlag(value) {
       const v = String(value || '').trim().toUpperCase();
       return v === 'A' || v === 'S' || v === 'N';
@@ -1405,6 +1612,7 @@
       if (state.tab === 'log') renderLog();
       if (state.tab === 'badge') renderBadge();
       if (state.tab === 'heatmap') renderHeatmap();
+      if (state.tab === 'karen') renderKaren();
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
@@ -2154,6 +2362,179 @@
         if (chart) chart.destroy();
       });
       state.charts = {};
+    }
+
+    function renderKaren() {
+      const groups = buildKarenGroups();
+      const intro = `
+        <div class="karen-intro">
+          <strong>Karen</strong> controlla le uscite che il sistema ha marcato come duplicati.
+          Se una è legittima, spunta la casella per riattivarla. La scelta vale per tutti gli utenti.
+        </div>
+      `;
+      if (!groups.length) {
+        dom.main.innerHTML = `${intro}<div class="karen-empty">Nessuna uscita scartata 🎉</div>`;
+        return;
+      }
+      const html = groups.map(group => {
+        const isOpen = state.openKarenGroups.has(group.id);
+        const keptHtml = group.kept
+          ? `<div class="karen-row karen-row--kept">
+              <span class="karen-row__mark" aria-hidden="true">✓</span>
+              ${karenRowMain(group.kept)}
+              ${karenRowMeta(group.kept, { showFlag: false })}
+            </div>`
+          : '';
+        const dupsHtml = group.dups.map(row => {
+          const pending = state.pendingOverrides.has(row.key);
+          const override = state.overrideMap.get(row.key);
+          const checked = override === true;
+          return `
+            <label class="karen-row ${pending ? 'karen-row__pending' : ''}">
+              <input type="checkbox" class="karen-row__check" data-karen-key="${escapeAttr(row.key)}" ${checked ? 'checked' : ''} ${pending ? 'disabled' : ''}>
+              ${karenRowMain(row)}
+              ${karenRowMeta(row, { showFlag: true })}
+            </label>
+          `;
+        }).join('');
+        return `
+          <div class="karen-group">
+            <button type="button" class="karen-group__header" data-karen-group="${escapeAttr(group.id)}" aria-expanded="${isOpen}">
+              <span>${escapeHtml(group.title)}</span>
+              <span class="karen-group__meta">
+                <span class="karen-group__count">${group.dups.length}</span>
+                <span>${isOpen ? '▲' : '▼'}</span>
+              </span>
+            </button>
+            ${isOpen ? `<div class="karen-group__body">${keptHtml}${dupsHtml}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+      dom.main.innerHTML = `${intro}${html}`;
+      dom.main.querySelectorAll('[data-karen-group]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.karenGroup;
+          if (state.openKarenGroups.has(id)) state.openKarenGroups.delete(id);
+          else state.openKarenGroups.add(id);
+          renderKaren();
+        });
+      });
+      dom.main.querySelectorAll('[data-karen-key]').forEach(input => {
+        input.addEventListener('change', event => handleKarenToggle(event.target));
+      });
+    }
+
+    function buildKarenGroups() {
+      const clusters = new Map();
+      for (const row of state.allRows) {
+        if (isExcludedAthlete(row.nome)) continue;
+        const clusterId = `${row.nome}|${row.anno}-${String(row.mese).padStart(2, '0')}`;
+        if (!clusters.has(clusterId)) {
+          clusters.set(clusterId, { id: clusterId, nome: row.nome, anno: row.anno, mese: row.mese, kept: null, dups: [] });
+        }
+        const cluster = clusters.get(clusterId);
+        if (row.isDuplicate) {
+          cluster.dups.push(row);
+        } else if (!cluster.kept || row.date < cluster.kept.date) {
+          cluster.kept = row;
+        }
+      }
+      const groups = [];
+      for (const cluster of clusters.values()) {
+        if (!cluster.dups.length) continue;
+        cluster.dups.sort((a, b) => a.date - b.date);
+        groups.push({
+          id: cluster.id,
+          title: `${cluster.nome} — ${MONTHS[cluster.mese - 1]} ${cluster.anno}`,
+          kept: cluster.kept,
+          dups: cluster.dups,
+          sortDate: cluster.kept ? cluster.kept.date : cluster.dups[0].date
+        });
+      }
+      groups.sort((a, b) => b.sortDate - a.sortDate);
+      return groups;
+    }
+
+    function karenRowMain(row) {
+      return `
+        <div class="karen-row__main">
+          <span class="karen-row__stat">${formatKm(row.distanza)}<small>km</small></span>
+          <span class="karen-row__stat">${formatInt(row.dislivello)}<small>D+</small></span>
+          <span class="karen-row__stat">${formatKm(row.media)}<small>km/h</small></span>
+        </div>
+      `;
+    }
+
+    function karenRowMeta(row, { showFlag }) {
+      const flag = showFlag && row.duplicate ? `<span class="karen-row__flag">${escapeHtml(row.duplicate)}</span>` : '';
+      return `
+        <div class="karen-row__meta">
+          <span>${formatDate(row.date)}</span>
+          ${flag}
+        </div>
+      `;
+    }
+
+    async function handleKarenToggle(input) {
+      const key = input.dataset.karenKey;
+      if (!key || state.pendingOverrides.has(key)) return;
+      const desired = input.checked;
+      const previous = state.overrideMap.get(key);
+      state.pendingOverrides.add(key);
+      renderKaren();
+      try {
+        await postOverride(key, desired);
+        state.overrideMap.set(key, desired);
+        rebuildActiveRows();
+        buildAthletes();
+        dom.rowCount.textContent = formatInt(state.data.length);
+        showToast(desired ? 'Riattivata' : 'Disattivata', 'ok');
+      } catch (error) {
+        if (previous === undefined) state.overrideMap.delete(key);
+        else state.overrideMap.set(key, previous);
+        showToast('Errore, riprova', 'error');
+      } finally {
+        state.pendingOverrides.delete(key);
+        if (state.tab === 'karen') renderKaren();
+        else render();
+      }
+    }
+
+    async function postOverride(key, included) {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), OVERRIDES_TIMEOUT_MS);
+      try {
+        const response = await fetch(OVERRIDES_URL, {
+          method: 'POST',
+          body: JSON.stringify({ key, included, password_hash: EXPECTED_HASH }),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          signal: controller.signal,
+          redirect: 'follow'
+        });
+        if (!response.ok) throw new Error('http_' + response.status);
+        const body = await response.json().catch(() => ({}));
+        if (!body.ok) throw new Error(body.error || 'server_error');
+        return body;
+      } finally {
+        window.clearTimeout(timer);
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(message, variant) {
+      let node = document.getElementById('toast');
+      if (!node) {
+        node = document.createElement('div');
+        node.id = 'toast';
+        node.className = 'toast';
+        document.body.appendChild(node);
+      }
+      node.textContent = message;
+      node.className = `toast toast--${variant} is-visible`;
+      if (toastTimer) window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => {
+        node.classList.remove('is-visible');
+      }, 1800);
     }
 
     function formatKm(value) {
