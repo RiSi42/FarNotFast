@@ -2478,14 +2478,10 @@
 
     function buildKarenGroups() {
       const byParent = new Map();
-      const slowRows = [];
       for (const row of state.allRows) {
         if (isExcludedAthlete(row.nome)) continue;
-        if (row.computedFlag === '0') continue;
-        if (row.computedFlag === 'S' || !row.parentKey) {
-          slowRows.push(row);
-          continue;
-        }
+        if (row.computedFlag !== 'A' && row.computedFlag !== 'N') continue;
+        if (!row.parentKey) continue;
         if (!byParent.has(row.parentKey)) byParent.set(row.parentKey, []);
         byParent.get(row.parentKey).push(row);
       }
@@ -2501,24 +2497,6 @@
           kept,
           dups,
           sortDate: kept.date
-        });
-      }
-      const slowClusters = new Map();
-      for (const row of slowRows) {
-        const id = `S|${row.nome}|${row.anno}-${String(row.mese).padStart(2, '0')}`;
-        if (!slowClusters.has(id)) {
-          slowClusters.set(id, { id, nome: row.nome, anno: row.anno, mese: row.mese, dups: [] });
-        }
-        slowClusters.get(id).dups.push(row);
-      }
-      for (const cluster of slowClusters.values()) {
-        cluster.dups.sort((a, b) => a.date - b.date);
-        groups.push({
-          id: cluster.id,
-          title: `${cluster.nome} — ${MONTHS[cluster.mese - 1]} ${cluster.anno} (lente)`,
-          kept: null,
-          dups: cluster.dups,
-          sortDate: cluster.dups[0].date
         });
       }
       groups.sort((a, b) => b.sortDate - a.sortDate);
