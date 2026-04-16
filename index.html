@@ -1414,12 +1414,13 @@
     }
 
     async function loadData() {
+      const bust = `&_=${Date.now()}`;
       const [mainResult, overridesResult] = await Promise.allSettled([
         fetch(CSV_URL, { cache: 'no-store' }).then(r => {
           if (!r.ok) throw new Error('Google Sheet non raggiungibile');
           return r.text();
         }),
-        fetch(OVERRIDES_CSV_URL, { cache: 'no-store' }).then(r => r.ok ? r.text() : '')
+        fetch(OVERRIDES_CSV_URL + bust, { cache: 'no-store' }).then(r => r.ok ? r.text() : '')
       ]);
       if (mainResult.status === 'rejected') throw mainResult.reason;
       const parsed = Papa.parse(mainResult.value, { header: false, skipEmptyLines: true });
@@ -1430,9 +1431,13 @@
       await assignRowKeys(allRows);
       computeDuplicateFlags(allRows);
       state.allRows = allRows;
-      state.overrideMap = overridesResult.status === 'fulfilled'
-        ? parseOverrides(overridesResult.value)
-        : new Map();
+      if (overridesResult.status === 'fulfilled') {
+        state.overrideMap = parseOverrides(overridesResult.value);
+        console.log('[Karen] overrides caricati:', state.overrideMap.size, 'righe');
+      } else {
+        state.overrideMap = new Map();
+        console.warn('[Karen] fetch overrides fallito:', overridesResult.reason);
+      }
       rebuildActiveRows();
       if (!state.data.length) throw new Error('CSV vuoto');
       buildAthletes();
