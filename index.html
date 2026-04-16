@@ -1427,6 +1427,7 @@
       const columns = getColumnIndexes(headers);
       const allRows = parsed.data.slice(1).map(row => parseRow(row, columns)).filter(Boolean);
       await assignRowKeys(allRows);
+      computeDuplicateFlags(allRows);
       state.allRows = allRows;
       state.overrideMap = overridesResult.status === 'fulfilled'
         ? parseOverrides(overridesResult.value)
@@ -1552,6 +1553,57 @@
     function isDuplicateFlag(value) {
       const v = String(value || '').trim().toUpperCase();
       return v === 'A' || v === 'S' || v === 'N';
+    }
+
+    // Replica della formula J del Sheet. Itera le righe in ordine CSV (= ordine Sheet).
+    // Per ogni riga calcola flag ∈ {'0','A','N','S'} e parentKey (riga '0' che la origina).
+    function computeDuplicateFlags(rows) {
+      const DAY = 24 * 60 * 60 * 1000;
+      const EPS = 0.01;
+      const datesWithin = (a, b, maxDays) => Math.abs(a - b) / DAY <= maxDays;
+      const near = (a, b) => Math.abs(a - b) <= EPS;
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        row.computedFlag = '0';
+        row.parentKey = null;
+        if (row.media > 0 && row.media < 7) {
+          row.computedFlag = 'S';
+          continue;
+        }
+        if (i === 0) continue;
+        // A: stesso Nome, |Δdata| ≤ 4gg, Dislivello/Distanza/Media esatti
+        for (let j = 0; j < i; j++) {
+          const prev = rows[j];
+          if (prev.computedFlag !== '0') continue;
+          if (prev.nome !== row.nome) continue;
+          if (!datesWithin(prev.date, row.date, 4)) continue;
+          if (!near(prev.dislivello, row.dislivello)) continue;
+          if (!near(prev.distanza, row.distanza)) continue;
+          if (!near(prev.media, row.media)) continue;
+          row.computedFlag = 'A';
+          row.parentKey = prev.key;
+          break;
+        }
+        if (row.computedFlag !== '0') continue;
+        // N: stesso Nome, |Δdata| ≤ 4gg, |ΔDistanza| ≤ 30% min, |ΔMedia| ≤ 30% min
+        for (let j = 0; j < i; j++) {
+          const prev = rows[j];
+          if (prev.computedFlag !== '0') continue;
+          if (prev.nome !== row.nome) continue;
+          if (!datesWithin(prev.date, row.date, 4)) continue;
+          const minDist = Math.min(prev.distanza, row.distanza);
+          const minMedia = Math.min(prev.media, row.media);
+          if (Math.abs(prev.distanza - row.distanza) > 0.3 * minDist) continue;
+          if (Math.abs(prev.media - row.media) > 0.3 * minMedia) continue;
+          row.computedFlag = 'N';
+          row.parentKey = prev.key;
+          break;
+        }
+      }
+      for (const row of rows) {
+        row.isDuplicate = row.computedFlag !== '0';
+        row.duplicate = row.computedFlag === '0' ? '' : row.computedFlag;
+      }
     }
 
     function parseNum(s) {
@@ -2425,30 +2477,48 @@
     }
 
     function buildKarenGroups() {
-      const clusters = new Map();
+      const byParent = new Map();
+      const slowRows = [];
       for (const row of state.allRows) {
         if (isExcludedAthlete(row.nome)) continue;
-        const clusterId = `${row.nome}|${row.anno}-${String(row.mese).padStart(2, '0')}`;
-        if (!clusters.has(clusterId)) {
-          clusters.set(clusterId, { id: clusterId, nome: row.nome, anno: row.anno, mese: row.mese, kept: null, dups: [] });
+        if (row.computedFlag === '0') continue;
+        if (row.computedFlag === 'S' || !row.parentKey) {
+          slowRows.push(row);
+          continue;
         }
-        const cluster = clusters.get(clusterId);
-        if (row.isDuplicate) {
-          cluster.dups.push(row);
-        } else if (!cluster.kept || row.date < cluster.kept.date) {
-          cluster.kept = row;
-        }
+        if (!byParent.has(row.parentKey)) byParent.set(row.parentKey, []);
+        byParent.get(row.parentKey).push(row);
       }
+      const parentIndex = new Map(state.allRows.map(r => [r.key, r]));
       const groups = [];
-      for (const cluster of clusters.values()) {
-        if (!cluster.dups.length) continue;
+      for (const [parentKey, dups] of byParent) {
+        const kept = parentIndex.get(parentKey);
+        if (!kept) continue;
+        dups.sort((a, b) => a.date - b.date);
+        groups.push({
+          id: `P|${parentKey}`,
+          title: `${kept.nome} — ${formatDate(kept.date)}`,
+          kept,
+          dups,
+          sortDate: kept.date
+        });
+      }
+      const slowClusters = new Map();
+      for (const row of slowRows) {
+        const id = `S|${row.nome}|${row.anno}-${String(row.mese).padStart(2, '0')}`;
+        if (!slowClusters.has(id)) {
+          slowClusters.set(id, { id, nome: row.nome, anno: row.anno, mese: row.mese, dups: [] });
+        }
+        slowClusters.get(id).dups.push(row);
+      }
+      for (const cluster of slowClusters.values()) {
         cluster.dups.sort((a, b) => a.date - b.date);
         groups.push({
           id: cluster.id,
-          title: `${cluster.nome} — ${MONTHS[cluster.mese - 1]} ${cluster.anno}`,
-          kept: cluster.kept,
+          title: `${cluster.nome} — ${MONTHS[cluster.mese - 1]} ${cluster.anno} (lente)`,
+          kept: null,
           dups: cluster.dups,
-          sortDate: cluster.kept ? cluster.kept.date : cluster.dups[0].date
+          sortDate: cluster.dups[0].date
         });
       }
       groups.sort((a, b) => b.sortDate - a.sortDate);
