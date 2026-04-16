@@ -2503,6 +2503,10 @@
       const chip = event.target.closest('.chip');
       if (!chip || !chip.dataset.karenAthlete) return;
       state.karenAthlete = chip.dataset.karenAthlete;
+      if (state.karenAthlete !== 'tutti') {
+        const groups = buildKarenGroups().filter(g => g.kept?.nome === state.karenAthlete || g.dups.some(d => d.nome === state.karenAthlete));
+        groups.forEach(g => state.openKarenGroups.add(g.id));
+      }
       renderKaren();
     }
 
