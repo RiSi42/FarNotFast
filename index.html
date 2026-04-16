@@ -2492,6 +2492,7 @@
       } catch (error) {
         if (previous === undefined) state.overrideMap.delete(key);
         else state.overrideMap.set(key, previous);
+        console.error('[karen] POST override fallito', error);
         showToast('Errore, riprova', 'error');
       } finally {
         state.pendingOverrides.delete(key);
@@ -2511,9 +2512,20 @@
           signal: controller.signal,
           redirect: 'follow'
         });
-        if (!response.ok) throw new Error('http_' + response.status);
-        const body = await response.json().catch(() => ({}));
-        if (!body.ok) throw new Error(body.error || 'server_error');
+        const text = await response.text();
+        if (!response.ok) {
+          console.error('[karen] response not ok', response.status, text.slice(0, 400));
+          throw new Error('http_' + response.status);
+        }
+        let body;
+        try { body = JSON.parse(text); } catch (parseErr) {
+          console.error('[karen] response non-JSON', text.slice(0, 400));
+          throw new Error('bad_response');
+        }
+        if (!body.ok) {
+          console.error('[karen] server rejected', body);
+          throw new Error(body.error || 'server_error');
+        }
         return body;
       } finally {
         window.clearTimeout(timer);
