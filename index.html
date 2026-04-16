@@ -1572,12 +1572,12 @@
           continue;
         }
         if (i === 0) continue;
-        // A: stesso Nome, |Δdata| ≤ 2gg, Dislivello/Distanza/Media esatti
+        // A: stesso Nome, |Δdata| ≤ 1gg, Dislivello/Distanza/Media esatti
         for (let j = 0; j < i; j++) {
           const prev = rows[j];
           if (prev.computedFlag !== '0') continue;
           if (prev.nome !== row.nome) continue;
-          if (!datesWithin(prev.date, row.date, 2)) continue;
+          if (!datesWithin(prev.date, row.date, 1)) continue;
           if (!near(prev.dislivello, row.dislivello)) continue;
           if (!near(prev.distanza, row.distanza)) continue;
           if (!near(prev.media, row.media)) continue;
@@ -1586,12 +1586,12 @@
           break;
         }
         if (row.computedFlag !== '0') continue;
-        // N: stesso Nome, |Δdata| ≤ 2gg, ΔDistanza/ΔMedia ≤ 20% min, ΔD+ ≤ max(50, 20% min)
+        // N: stesso Nome, |Δdata| ≤ 1gg, ΔDistanza/ΔMedia ≤ 20% min, ΔD+ ≤ max(50, 20% min)
         for (let j = 0; j < i; j++) {
           const prev = rows[j];
           if (prev.computedFlag !== '0') continue;
           if (prev.nome !== row.nome) continue;
-          if (!datesWithin(prev.date, row.date, 2)) continue;
+          if (!datesWithin(prev.date, row.date, 1)) continue;
           const minDist = Math.min(prev.distanza, row.distanza);
           const minMedia = Math.min(prev.media, row.media);
           const minDplus = Math.min(prev.dislivello, row.dislivello);
