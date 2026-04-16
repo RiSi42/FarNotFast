@@ -1432,17 +1432,9 @@
       await assignRowKeys(allRows);
       computeDuplicateFlags(allRows);
       state.allRows = allRows;
-      if (overridesResult.status === 'fulfilled') {
-        console.log('[Karen] overrides URL:', OVERRIDES_CSV_URL);
-        console.log('[Karen] overrides CSV (prime 400 char):', (overridesResult.value || '').slice(0, 400));
-        state.overrideMap = parseOverrides(overridesResult.value);
-        console.log('[Karen] overrides caricati:', state.overrideMap.size, 'righe');
-        const firstKeys = Array.from(state.overrideMap.keys()).slice(0, 3);
-        console.log('[Karen] prime 3 chiavi:', firstKeys);
-      } else {
-        state.overrideMap = new Map();
-        console.warn('[Karen] fetch overrides fallito:', overridesResult.reason);
-      }
+      state.overrideMap = overridesResult.status === 'fulfilled'
+        ? parseOverrides(overridesResult.value)
+        : new Map();
       rebuildActiveRows();
       if (!state.data.length) throw new Error('CSV vuoto');
       buildAthletes();
