@@ -2505,28 +2505,17 @@
       const controller = new AbortController();
       const timer = window.setTimeout(() => controller.abort(), OVERRIDES_TIMEOUT_MS);
       try {
-        const response = await fetch(OVERRIDES_URL, {
+        await fetch(OVERRIDES_URL, {
           method: 'POST',
+          mode: 'no-cors',
           body: JSON.stringify({ key, included, password_hash: EXPECTED_HASH }),
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           signal: controller.signal,
           redirect: 'follow'
         });
-        const text = await response.text();
-        if (!response.ok) {
-          console.error('[karen] response not ok', response.status, text.slice(0, 400));
-          throw new Error('http_' + response.status);
-        }
-        let body;
-        try { body = JSON.parse(text); } catch (parseErr) {
-          console.error('[karen] response non-JSON', text.slice(0, 400));
-          throw new Error('bad_response');
-        }
-        if (!body.ok) {
-          console.error('[karen] server rejected', body);
-          throw new Error(body.error || 'server_error');
-        }
-        return body;
+        // Apps Script Web Apps redirigono verso googleusercontent senza header CORS:
+        // la risposta è opaca in no-cors, non possiamo leggerla.
+        // Se la fetch non ha sollevato eccezione, la richiesta è partita.
       } finally {
         window.clearTimeout(timer);
       }
