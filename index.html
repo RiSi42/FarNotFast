@@ -1266,6 +1266,7 @@
       overrideMap: new Map(),
       pendingOverrides: new Set(),
       openKarenGroups: new Set(),
+      karenAthlete: 'tutti',
       athletes: [],
       athleteColorMap: {},
       tab: 'classifica',
@@ -2419,15 +2420,34 @@
     }
 
     function renderKaren() {
-      const groups = buildKarenGroups();
+      const allGroups = buildKarenGroups();
+      const athletesWithDups = Array.from(new Set(allGroups.flatMap(g => [g.kept?.nome, ...g.dups.map(d => d.nome)].filter(Boolean))))
+        .sort((a, b) => state.athletes.indexOf(a) - state.athletes.indexOf(b));
+      if (state.karenAthlete !== 'tutti' && !athletesWithDups.includes(state.karenAthlete)) {
+        state.karenAthlete = 'tutti';
+      }
+      const groups = state.karenAthlete === 'tutti'
+        ? allGroups
+        : allGroups.filter(g => g.kept?.nome === state.karenAthlete || g.dups.some(d => d.nome === state.karenAthlete));
       const intro = `
         <div class="karen-intro">
           <strong>Karen</strong> controlla le uscite che il sistema ha marcato come duplicati.
           Se una è legittima, spunta la casella per riattivarla. La scelta vale per tutti gli utenti.
         </div>
       `;
-      if (!groups.length) {
+      const filterHtml = athletesWithDups.length > 1 ? `
+        <div id="karenAthletes" class="chip-row">
+          ${chipHtml('Tutti', state.karenAthlete === 'tutti', { karenAthlete: 'tutti' })}
+          ${athletesWithDups.map(name => chipHtml(name, state.karenAthlete === name, { karenAthlete: name, color: state.athleteColorMap[name] })).join('')}
+        </div>
+      ` : '';
+      if (!allGroups.length) {
         dom.main.innerHTML = `${intro}<div class="karen-empty">Nessuna uscita scartata 🎉</div>`;
+        return;
+      }
+      if (!groups.length) {
+        dom.main.innerHTML = `${intro}${filterHtml}<div class="karen-empty">Nessuna uscita scartata per ${escapeHtml(state.karenAthlete)}.</div>`;
+        dom.main.querySelector('#karenAthletes')?.addEventListener('click', onKarenAthleteClick);
         return;
       }
       const html = groups.map(group => {
@@ -2464,7 +2484,8 @@
           </div>
         `;
       }).join('');
-      dom.main.innerHTML = `${intro}${html}`;
+      dom.main.innerHTML = `${intro}${filterHtml}${html}`;
+      dom.main.querySelector('#karenAthletes')?.addEventListener('click', onKarenAthleteClick);
       dom.main.querySelectorAll('[data-karen-group]').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.karenGroup;
@@ -2476,6 +2497,13 @@
       dom.main.querySelectorAll('[data-karen-key]').forEach(input => {
         input.addEventListener('change', event => handleKarenToggle(event.target));
       });
+    }
+
+    function onKarenAthleteClick(event) {
+      const chip = event.target.closest('.chip');
+      if (!chip || !chip.dataset.karenAthlete) return;
+      state.karenAthlete = chip.dataset.karenAthlete;
+      renderKaren();
     }
 
     function buildKarenGroups() {
