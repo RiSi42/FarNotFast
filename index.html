@@ -2659,5 +2659,403 @@
       return escapeHtml(value);
     }
   </script>
+
+  <!-- ═══════════════════════════════════════════════════
+       POPUP PUBBLICITARIO
+  ════════════════════════════════════════════════════ -->
+  <style>
+    /* ── overlay base ── */
+    #ad-overlay, #premium-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+    #ad-overlay.visible, #premium-overlay.visible {
+      display: flex;
+    }
+
+    /* ── popup ad ── */
+    #ad-popup {
+      position: relative;
+      background: #111;
+      border: 3px solid var(--accent);
+      border-radius: 6px;
+      max-width: 520px;
+      width: 92vw;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(252,76,2,0.5);
+      animation: adPop .25s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes adPop {
+      from { transform: scale(.7) rotate(-3deg); opacity:0; }
+      to   { transform: scale(1) rotate(0deg);  opacity:1; }
+    }
+    #ad-popup img {
+      display: block;
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+    }
+    #ad-popup .ad-badge {
+      position: absolute;
+      top: 8px; left: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+    #ad-popup .ad-close {
+      position: absolute;
+      top: 6px; right: 8px;
+      background: rgba(0,0,0,.6);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #ad-popup .ad-close:hover { background: var(--danger); }
+    #ad-popup .ad-actions {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #1a1a1a;
+    }
+    #ad-popup .ad-actions button {
+      flex: 1;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 10px 0;
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+    }
+    #btn-buy {
+      background: var(--accent);
+      color: #fff;
+    }
+    #btn-buy:hover { background: #e04300; }
+    #btn-premium {
+      background: var(--gold);
+      color: #111;
+    }
+    #btn-premium:hover { background: #e6c200; }
+
+    /* ── popup premium ── */
+    #premium-popup {
+      background: #1a1a1a;
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      max-width: 480px;
+      width: 92vw;
+      padding: 28px 24px 24px;
+      position: relative;
+      box-shadow: 0 0 60px rgba(255,215,0,0.25);
+      animation: adPop .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    #premium-popup .pr-close {
+      position: absolute;
+      top: 10px; right: 14px;
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    #premium-popup .pr-close:hover { color: #fff; }
+    #premium-popup .pr-crown {
+      font-size: 38px;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    #premium-popup h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin: 0 0 4px;
+    }
+    #premium-popup .pr-tagline {
+      text-align: center;
+      color: var(--text2);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+    #premium-popup ul {
+      list-style: none;
+      padding: 0; margin: 0 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #premium-popup ul li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    #premium-popup ul li .pr-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    #premium-popup .pr-price-block {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    #premium-popup .pr-original {
+      font-size: 13px;
+      color: var(--text3);
+      text-decoration: line-through;
+    }
+    #premium-popup .pr-discounted {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    #premium-popup .pr-discount-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    #premium-popup .pr-sub-note {
+      font-size: 11px;
+      color: var(--text3);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    #premium-popup-subscribe-wrap {
+      position: relative;
+      height: 48px;
+      margin-bottom: 4px;
+    }
+    #btn-subscribe {
+      position: absolute;
+      background: var(--gold);
+      color: #111;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: left .18s ease, top .18s ease;
+    }
+    #btn-subscribe:hover { background: #ffe44d; }
+  </style>
+
+  <!-- AD overlay -->
+  <div id="ad-overlay">
+    <div id="ad-popup">
+      <span class="ad-badge">Sponsorizzato</span>
+      <button class="ad-close" id="btn-ad-close" aria-label="Chiudi">✕</button>
+      <img id="ad-img" src="" alt="Pubblicità">
+      <div class="ad-actions">
+        <button id="btn-buy">🛒 Compra Subito</button>
+        <button id="btn-premium">⭐ Passa a Premium</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREMIUM overlay -->
+  <div id="premium-overlay">
+    <div id="premium-popup">
+      <button class="pr-close" id="btn-premium-close" aria-label="Chiudi">✕</button>
+      <div class="pr-crown">👑</div>
+      <h2>FarNotFast Premium</h2>
+      <p class="pr-tagline">L'esperienza ciclistica che meriti. Finalmente.</p>
+      <ul>
+        <li><span class="pr-icon">🚫</span><span><strong>Zero pubblicità.</strong> Mai più banner con prodotti che non ti servono. Solo tu, la bici, e la salita.</span></li>
+        <li><span class="pr-icon">🚀</span><span><strong>Boost KMetrico in classifica.</strong> +5% automatico su ogni uscita. Il tuo Garmin non saprà nulla.</span></li>
+        <li><span class="pr-icon">📅</span><span><strong>Uscite bonus auto-aggiunte.</strong> Stelvio, Carpegna, Mortirolo e altri percorsi iconici appariranno nel tuo storico. Garantito.</span></li>
+        <li><span class="pr-icon">🪡</span><span><strong>Toppa da cucire sui bibs.</strong> Spedita a casa. "FNF Premium Member" in ricamo dorato.</span></li>
+        <li><span class="pr-icon">💡</span><span><strong>Anellini catarifrangenti per i raggi.</strong> 16 pezzi. Visibilità +300%. Gram weenie certificato.</span></li>
+        <li><span class="pr-icon">🍋</span><span><strong>Borraccia gusto limone.</strong> Una borraccia. Vera. Al limone. Con il logo.</span></li>
+      </ul>
+      <div class="pr-price-block">
+        <div class="pr-original">Valore reale: €312/mese</div>
+        <div>
+          <span class="pr-discounted" id="pr-final-price"></span>
+          <span class="pr-discount-badge" id="pr-discount-badge"></span>
+        </div>
+      </div>
+      <p class="pr-sub-note">Rinnovo automatico ogni mese. Disdici quando vuoi (ma perché dovresti?).</p>
+      <div id="premium-popup-subscribe-wrap">
+        <button id="btn-subscribe">Sottoscrivi ora</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const FIRST_DELAY_MS = 10000;
+      const INTERVAL_MS = 12 * 60 * 60 * 1000; // 12h
+      const LS_KEY = 'fnf_last_ad';
+
+      let bannerFiles = [];
+
+      fetch('Banner/list.json')
+        .then(r => r.json())
+        .then(list => { bannerFiles = list; })
+        .catch(() => { bannerFiles = []; });
+
+      // ── mostra popup ad ──
+      function showAd() {
+        if (!bannerFiles.length) return;
+        const file = bannerFiles[Math.floor(Math.random() * bannerFiles.length)];
+        document.getElementById('ad-img').src = `Banner/${file}`;
+        document.getElementById('ad-overlay').classList.add('visible');
+        localStorage.setItem(LS_KEY, Date.now());
+        scheduleNextAd(INTERVAL_MS);
+      }
+
+      function scheduleNextAd(delay) {
+        setTimeout(showAd, delay);
+      }
+
+      // calcola quando mostrare il prossimo banner
+      (function scheduleFirst() {
+        const last = parseInt(localStorage.getItem(LS_KEY) || '0', 10);
+        const elapsed = Date.now() - last;
+        const remaining = INTERVAL_MS - elapsed;
+
+        if (remaining <= 0) {
+          // mai visto o passate più di 24h → attendi 10s
+          scheduleNextAd(FIRST_DELAY_MS);
+        } else {
+          // tab riaperta prima di 24h → aspetta il tempo rimanente
+          scheduleNextAd(remaining);
+        }
+      })();
+
+      // ── chiudi ad ──
+      document.getElementById('btn-ad-close').addEventListener('click', function () {
+        document.getElementById('ad-overlay').classList.remove('visible');
+      });
+
+      // chiudi cliccando fuori dal popup
+      document.getElementById('ad-overlay').addEventListener('click', function (e) {
+        if (e.target === this) this.classList.remove('visible');
+      });
+
+      // ── Compra Subito → post random r/BicyclingCirclejerk ──
+      document.getElementById('btn-buy').addEventListener('click', async function () {
+        try {
+          const res = await fetch(
+            'https://www.reddit.com/r/BicyclingCirclejerk/top.json?limit=100&t=all',
+            { headers: { 'Accept': 'application/json' } }
+          );
+          const data = await res.json();
+          const posts = data.data.children.filter(p => !p.data.stickied);
+          const post = posts[Math.floor(Math.random() * posts.length)];
+          window.open('https://www.reddit.com' + post.data.permalink, '_blank');
+        } catch (_) {
+          // fallback: subreddit direttamente
+          window.open('https://www.reddit.com/r/BicyclingCirclejerk/', '_blank');
+        }
+      });
+
+      // ── Passa a Premium ──
+      document.getElementById('btn-premium').addEventListener('click', function () {
+        openPremium();
+      });
+
+      function openPremium() {
+        // genera sconto e prezzo randomici
+        const discount = Math.floor(Math.random() * 71) + 10; // 10–80%
+        const discounted = (77.77 * (1 - discount / 100)).toFixed(2);
+        document.getElementById('pr-final-price').textContent = `€${discounted}/mese`;
+        document.getElementById('pr-discount-badge').textContent = `-${discount}%`;
+
+        // posiziona il bottone al centro del suo wrapper
+        const btn = document.getElementById('btn-subscribe');
+        const wrap = document.getElementById('premium-popup-subscribe-wrap');
+        btn.style.left = '50%';
+        btn.style.top = '0';
+        btn.style.transform = 'translateX(-50%)';
+
+        document.getElementById('premium-overlay').classList.add('visible');
+      }
+
+      // ── chiudi premium → torna al popup ad ──
+      document.getElementById('btn-premium-close').addEventListener('click', function () {
+        document.getElementById('premium-overlay').classList.remove('visible');
+        document.getElementById('ad-overlay').classList.add('visible');
+      });
+
+      document.getElementById('premium-overlay').addEventListener('click', function (e) {
+        if (e.target === this) {
+          this.classList.remove('visible');
+          document.getElementById('ad-overlay').classList.add('visible');
+        }
+      });
+
+      // ── bottone che scappa ──
+      const subBtn = document.getElementById('btn-subscribe');
+      const subWrap = document.getElementById('premium-popup-subscribe-wrap');
+
+      function escapeBtnPos() {
+        const ww = subWrap.offsetWidth;
+        const wh = subWrap.offsetHeight;
+        const bw = subBtn.offsetWidth;
+        const bh = subBtn.offsetHeight;
+        const maxX = Math.max(0, ww - bw);
+        const maxY = Math.max(0, wh - bh);
+        const newX = Math.floor(Math.random() * maxX);
+        const newY = Math.floor(Math.random() * maxY);
+        subBtn.style.transform = 'none';
+        subBtn.style.left = newX + 'px';
+        subBtn.style.top  = newY + 'px';
+      }
+
+      // allarga il wrapper per dare spazio al bottone fuggiasco
+      function ensureWrapSpace() {
+        subWrap.style.height = (subBtn.offsetHeight + 60) + 'px';
+      }
+
+      subBtn.addEventListener('mouseenter', function () {
+        ensureWrapSpace();
+        escapeBtnPos();
+      });
+      // fallback touch
+      subBtn.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        ensureWrapSpace();
+        escapeBtnPos();
+      }, { passive: false });
+
+    })();
+  </script>
 </body>
 </html>

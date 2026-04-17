@@ -37,6 +37,10 @@ jobs:
           perl -0pi -e 's/\Q__OVERRIDES_URL__\E/$ENV{OVERRIDES_URL}/g' index.html
           ! grep -q "__CSV_URL__" index.html
           ! grep -q "__OVERRIDES_URL__" index.html
+      - name: Generate banner list
+        run: |
+          files=$(ls Banner/*.png Banner/*.jpg Banner/*.jpeg Banner/*.gif Banner/*.webp 2>/dev/null | xargs -I{} basename {} | jq -R . | jq -sc .)
+          echo "$files" > Banner/list.json
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
