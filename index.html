@@ -2697,8 +2697,9 @@
     #ad-popup img {
       display: block;
       width: 100%;
-      max-height: 300px;
-      object-fit: cover;
+      height: auto;
+      max-height: 80vh;
+      object-fit: contain;
     }
     #ad-popup .ad-badge {
       position: absolute;
@@ -2944,30 +2945,14 @@
         setTimeout(showAd, delay);
       }
 
-      // calcola quando mostrare il prossimo banner
-      (function scheduleFirst() {
-        const last = parseInt(localStorage.getItem(LS_KEY) || '0', 10);
-        const elapsed = Date.now() - last;
-        const remaining = INTERVAL_MS - elapsed;
-
-        if (remaining <= 0) {
-          // mai visto o passate più di 24h → attendi 10s
-          scheduleNextAd(FIRST_DELAY_MS);
-        } else {
-          // tab riaperta prima di 24h → aspetta il tempo rimanente
-          scheduleNextAd(remaining);
-        }
-      })();
+      // ogni page load → sempre dopo 10s; se la tab resta aperta → ogni 12h
+      scheduleNextAd(FIRST_DELAY_MS);
 
       // ── chiudi ad ──
       document.getElementById('btn-ad-close').addEventListener('click', function () {
         document.getElementById('ad-overlay').classList.remove('visible');
       });
 
-      // chiudi cliccando fuori dal popup
-      document.getElementById('ad-overlay').addEventListener('click', function (e) {
-        if (e.target === this) this.classList.remove('visible');
-      });
 
       // ── Compra Subito → post random r/BicyclingCirclejerk ──
       document.getElementById('btn-buy').addEventListener('click', async function () {
