@@ -2905,7 +2905,7 @@
         <li><span class="pr-icon">🍋</span><span><strong>Borraccia gusto limone.</strong> Una borraccia. Vera. Al limone. Con il logo.</span></li>
       </ul>
       <div class="pr-price-block">
-        <div class="pr-original">Valore reale: €312/mese</div>
+        <div class="pr-original" id="pr-original-price"></div>
         <div>
           <span class="pr-discounted" id="pr-final-price"></span>
           <span class="pr-discount-badge" id="pr-discount-badge"></span>
@@ -2945,8 +2945,8 @@
         setTimeout(showAd, delay);
       }
 
-      // ogni page load → sempre dopo 10s; se la tab resta aperta → ogni 12h
-      scheduleNextAd(FIRST_DELAY_MS);
+      // ogni page load → subito; se la tab resta aperta → ogni 12h
+      scheduleNextAd(0);
 
       // ── chiudi ad ──
       document.getElementById('btn-ad-close').addEventListener('click', function () {
@@ -2979,8 +2979,9 @@
       function openPremium() {
         // genera sconto e prezzo randomici
         const discount = Math.floor(Math.random() * 71) + 10; // 10–80%
-        const discounted = (77.77 * (1 - discount / 100)).toFixed(2);
-        document.getElementById('pr-final-price').textContent = `€${discounted}/mese`;
+        const original = (77.77 / (1 - discount / 100)).toFixed(2);
+        document.getElementById('pr-original-price').textContent = `Valore reale: €${original}/mese`;
+        document.getElementById('pr-final-price').textContent = `€77,77/mese`;
         document.getElementById('pr-discount-badge').textContent = `-${discount}%`;
 
         // posiziona il bottone al centro del suo wrapper
