@@ -1368,6 +1368,7 @@
         dom.loading.classList.add('hidden');
         dom.app.classList.remove('hidden');
         render();
+        window.dispatchEvent(new CustomEvent('fnf:app-ready'));
       } catch (error) {
         dom.loading.classList.add('hidden');
         showError(error);
@@ -2945,8 +2946,14 @@
         setTimeout(showAd, delay);
       }
 
-      // ogni page load → subito; se la tab resta aperta → ogni 12h
-      scheduleNextAd(0);
+      // banner parte solo quando l'app è pronta (dopo login + carica dati + render)
+      // poi se la tab resta aperta → ogni 12h
+      let adStarted = false;
+      window.addEventListener('fnf:app-ready', function () {
+        if (adStarted) return;
+        adStarted = true;
+        scheduleNextAd(0);
+      });
 
       // ── chiudi ad ──
       document.getElementById('btn-ad-close').addEventListener('click', function () {
