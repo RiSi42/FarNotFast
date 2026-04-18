@@ -246,6 +246,28 @@
       backdrop-filter: blur(16px);
     }
 
+    .filters__period {
+      padding: 6px 0 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filters__period .filter-group {
+      margin-top: 0;
+    }
+
+    .filters__period .segmented {
+      width: calc(100% - 32px);
+      margin: 0 16px;
+    }
+
+    .filters__period .filter-label {
+      margin-bottom: 5px;
+    }
+
+    .filters__period .segmented button {
+      min-height: 38px;
+    }
+
     .filters__toggle {
       width: 100%;
       min-height: 46px;
@@ -260,6 +282,10 @@
       font-size: 18px;
       font-weight: 700;
       text-transform: uppercase;
+    }
+
+    .filters__label {
+      color: var(--accent);
     }
 
     .filters__toggle span {
@@ -447,11 +473,14 @@
       min-width: 0;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      font-family: "Barlow Condensed", Barlow, sans-serif;
+      font-size: 23px;
       font-weight: 700;
+      line-height: 1;
     }
 
-    .rank-name span:last-child {
+    .rank-name-text {
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -460,8 +489,9 @@
 
     .rank-sub {
       color: var(--text3);
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .rank-value {
@@ -517,6 +547,31 @@
 
     .chart-card {
       padding: 12px;
+    }
+
+    .section-panel {
+      padding: 12px;
+    }
+
+    .section-panel .segmented {
+      width: 100%;
+      margin: 0;
+    }
+
+    .section-panel .filter-group {
+      margin-top: 0;
+    }
+
+    .section-panel .filter-group + .filter-group {
+      margin-top: 10px;
+    }
+
+    .section-panel .filter-label {
+      margin: 0 0 6px;
+    }
+
+    .section-panel .chip-row {
+      padding: 0 0 2px;
     }
 
     .chart-wrap {
@@ -661,8 +716,20 @@
       margin: 0;
       min-width: 0;
       display: flex;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 10px;
+    }
+
+    .badge-title-main {
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge-name {
       font-family: "Barlow Condensed", Barlow, sans-serif;
       font-size: 22px;
       line-height: 1.05;
@@ -670,33 +737,24 @@
       text-transform: uppercase;
     }
 
-    .badge-title span:first-child {
+    .badge-desc {
       min-width: 0;
+      color: var(--text2);
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: none;
       overflow-wrap: anywhere;
     }
 
     .badge-winner {
       margin-top: 4px;
       min-width: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text);
+      color: var(--accent);
+      font-family: "Barlow Condensed", Barlow, sans-serif;
+      font-size: 24px;
+      line-height: 1;
       font-weight: 700;
-    }
-
-    .badge-winner span:last-child {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .badge-gag {
-      margin: 5px 0 0;
-      color: var(--text2);
-      font-size: 14px;
-      font-weight: 500;
+      overflow-wrap: anywhere;
     }
 
     .badge-help {
@@ -1186,15 +1244,17 @@
     </header>
 
     <section id="filters" class="filters hidden">
-      <button id="filterToggle" class="filters__toggle" type="button" aria-expanded="false">
-        <span>Filtri <span id="filterArrow">▼</span></span>
-        <span id="filterCount" class="pill-count hidden">0</span>
-      </button>
-      <div id="filterBody" class="filters__body hidden">
+      <div id="periodFilterBar" class="filters__period">
         <div class="filter-group">
           <p class="filter-label">Periodo</p>
           <div id="periodFilters" class="segmented" style="--segments:4" role="group" aria-label="Periodo"></div>
         </div>
+      </div>
+      <button id="filterToggle" class="filters__toggle" type="button" aria-expanded="false">
+        <span><span class="filters__label">Filtri</span> <span id="filterArrow">▼</span></span>
+        <span id="filterCount" class="pill-count hidden">0</span>
+      </button>
+      <div id="filterBody" class="filters__body hidden">
         <div class="filter-group">
           <p class="filter-label">Anno</p>
           <div id="yearFilters" class="chip-row"></div>
@@ -1300,6 +1360,7 @@
       errorMessage: document.getElementById('errorMessage'),
       app: document.getElementById('app'),
       filters: document.getElementById('filters'),
+      periodFilterBar: document.getElementById('periodFilterBar'),
       filterToggle: document.getElementById('filterToggle'),
       filterBody: document.getElementById('filterBody'),
       filterArrow: document.getElementById('filterArrow'),
@@ -1694,6 +1755,7 @@
       const hasGlobalFilters = ['trend', 'uscite', 'log'].includes(state.tab);
       dom.filters.classList.toggle('hidden', !hasGlobalFilters);
       if (!hasGlobalFilters) return;
+      dom.periodFilterBar.classList.remove('hidden');
       dom.filterBody.classList.toggle('hidden', !state.filterOpen);
       dom.filterToggle.setAttribute('aria-expanded', String(state.filterOpen));
       dom.filterArrow.textContent = state.filterOpen ? '▲' : '▼';
@@ -1820,7 +1882,6 @@
           name,
           sub: String(year),
           value: `${formatInt(total.km)} km`,
-          color: state.athleteColorMap[name],
           accent: index === 0
         });
       }).join('');
@@ -1841,8 +1902,7 @@
         medalClass: index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '',
         name,
         sub: `${formatInt(total.count)} uscite`,
-        value: `${formatInt(total.km)} km`,
-        color: state.athleteColorMap[name]
+        value: `${formatInt(total.km)} km`
       })).join('');
       return `
         <article class="card">
@@ -1852,16 +1912,15 @@
       `;
     }
 
-    function rankRow({ pos, medalClass = '', name, sub, value, color, accent = false }) {
+    function rankRow({ pos, medalClass = '', name, sub, value, accent = false }) {
       return `
         <div class="rank-row">
           <div class="rank-pos ${medalClass}" ${accent ? 'style="color:#fff;background:var(--accent)"' : ''}>${escapeHtml(pos)}</div>
           <div class="rank-main">
             <div class="rank-name">
-              <span class="dot" style="background:${escapeAttr(color || '#FC4C02')}"></span>
-              <span>${escapeHtml(name)}</span>
+              <span class="rank-name-text">${escapeHtml(name)}</span>
+              <span class="rank-sub">${escapeHtml(sub)}</span>
             </div>
-            <div class="rank-sub">${escapeHtml(sub)}</div>
           </div>
           <div class="rank-value">${escapeHtml(value)}</div>
         </div>
@@ -2138,24 +2197,26 @@
       dom.main.innerHTML = `
         <h2 class="section-title">Badge</h2>
         <div class="stack">
-          <div class="segmented" style="--segments:4" role="group" aria-label="Periodo badge">
-            <button type="button" class="${state.badgeMode === 'all' ? 'is-active' : ''}" data-badge-mode="all">Sempre</button>
-            <button type="button" class="${state.badgeMode === '12m' ? 'is-active' : ''}" data-badge-mode="12m">Ultimi 12 mesi</button>
-            <button type="button" class="${state.badgeMode === 'year' ? 'is-active' : ''}" data-badge-mode="year">Anno</button>
-            <button type="button" class="${state.badgeMode === 'month' ? 'is-active' : ''}" data-badge-mode="month">Mese</button>
+          <div class="card section-panel">
+            <div class="segmented" style="--segments:4" role="group" aria-label="Periodo badge">
+              <button type="button" class="${state.badgeMode === 'all' ? 'is-active' : ''}" data-badge-mode="all">Sempre</button>
+              <button type="button" class="${state.badgeMode === '12m' ? 'is-active' : ''}" data-badge-mode="12m">Ultimi 12 mesi</button>
+              <button type="button" class="${state.badgeMode === 'year' ? 'is-active' : ''}" data-badge-mode="year">Anno</button>
+              <button type="button" class="${state.badgeMode === 'month' ? 'is-active' : ''}" data-badge-mode="month">Mese</button>
+            </div>
+            ${state.badgeMode === 'month' ? `
+              <div class="filter-group">
+                <p class="filter-label">Mese</p>
+                <div id="badgeMonths" class="chip-row">${MONTHS.map((month, index) => chipHtml(month, state.badgeMonth === index + 1, { month: index + 1 })).join('')}</div>
+              </div>
+            ` : ''}
+            ${['month', 'year'].includes(state.badgeMode) ? `
+              <div class="filter-group">
+                <p class="filter-label">Anno</p>
+                <div id="badgeYears" class="chip-row">${years.map(year => chipHtml(year, state.badgeYear === year, { year })).join('')}</div>
+              </div>
+            ` : ''}
           </div>
-          ${state.badgeMode === 'month' ? `
-            <div class="filter-group">
-              <p class="filter-label">Mese</p>
-              <div id="badgeMonths" class="chip-row">${MONTHS.map((month, index) => chipHtml(month, state.badgeMonth === index + 1, { month: index + 1 })).join('')}</div>
-            </div>
-          ` : ''}
-          ${['month', 'year'].includes(state.badgeMode) ? `
-            <div class="filter-group">
-              <p class="filter-label">Anno</p>
-              <div id="badgeYears" class="chip-row">${years.map(year => chipHtml(year, state.badgeYear === year, { year })).join('')}</div>
-            </div>
-          ` : ''}
           <div class="badge-grid">
             ${results.map(badgeCard).join('')}
           </div>
@@ -2280,18 +2341,19 @@
 
     function badgeCard(badge) {
       const names = badge.names.length ? badge.names.join(', ') : 'Nessuno';
-      const first = badge.names[0];
-      const color = first ? state.athleteColorMap[first] : 'var(--text3)';
       return `
         <article class="badge-card">
           <div class="badge-emoji">${badge.emoji}</div>
           <div class="badge-body">
-            <h3 class="badge-title"><span>${escapeHtml(badge.name)} <button class="badge-help" type="button" data-help="${escapeAttr(badge.help)}" aria-label="Info">?</button></span><span class="badge-stat">${escapeHtml(badge.stat)}</span></h3>
-            <div class="badge-winner">
-              <span class="dot" style="background:${escapeAttr(color)}"></span>
-              <span>${escapeHtml(names)}</span>
-            </div>
-            <p class="badge-gag">${escapeHtml(badge.gag)}</p>
+            <h3 class="badge-title">
+              <span class="badge-title-main">
+                <span class="badge-name">${escapeHtml(badge.name)}</span>
+                <span class="badge-desc">${escapeHtml(badge.gag)}</span>
+                <button class="badge-help" type="button" data-help="${escapeAttr(badge.help)}" aria-label="Info">?</button>
+              </span>
+              <span class="badge-stat">${escapeHtml(badge.stat)}</span>
+            </h3>
+            <div class="badge-winner">${escapeHtml(names)}</div>
           </div>
         </article>
       `;
@@ -2302,25 +2364,29 @@
       const heat = buildHeatmapData();
       dom.main.innerHTML = `
         <h2 class="section-title">Heatmap</h2>
-        <div class="heatmap">
-          <div class="filter-group">
-            <p class="filter-label">Anno</p>
-            <div id="hmYears" class="chip-row">${years.map(year => chipHtml(year, state.hmYear === year, { year })).join('')}</div>
-          </div>
-          <div class="filter-group">
-            <p class="filter-label">Atleta</p>
-            <div id="hmAthletes" class="chip-row">
-              ${chipHtml('Tutti', state.hmAthlete === 'tutti', { athlete: 'tutti' })}
-              ${state.athletes.map(name => chipHtml(name, state.hmAthlete === name, { athlete: name, color: state.athleteColorMap[name] })).join('')}
+        <div class="stack">
+          <div class="card section-panel">
+            <div class="filter-group">
+              <p class="filter-label">Anno</p>
+              <div id="hmYears" class="chip-row">${years.map(year => chipHtml(year, state.hmYear === year, { year })).join('')}</div>
+            </div>
+            <div class="filter-group">
+              <p class="filter-label">Atleta</p>
+              <div id="hmAthletes" class="chip-row">
+                ${chipHtml('Tutti', state.hmAthlete === 'tutti', { athlete: 'tutti' })}
+                ${state.athletes.map(name => chipHtml(name, state.hmAthlete === name, { athlete: name, color: state.athleteColorMap[name] })).join('')}
+              </div>
             </div>
           </div>
-          <div class="month-grid">
-            ${MONTHS.map((month, index) => monthHeatmap(month, index + 1, heat)).join('')}
-          </div>
-          <div class="legend">
-            <span>0</span>
-            ${[0, 0.25, 0.5, 0.75, 1].map(value => `<span class="legend-box" style="background:${heatColor(value)}"></span>`).join('')}
-            <span>max</span>
+          <div class="heatmap">
+            <div class="month-grid">
+              ${MONTHS.map((month, index) => monthHeatmap(month, index + 1, heat)).join('')}
+            </div>
+            <div class="legend">
+              <span>0</span>
+              ${[0, 0.25, 0.5, 0.75, 1].map(value => `<span class="legend-box" style="background:${heatColor(value)}"></span>`).join('')}
+              <span>max</span>
+            </div>
           </div>
         </div>
       `;
@@ -2435,7 +2501,8 @@
       const intro = `
         <div class="karen-intro">
           <strong>Karen</strong> controlla le uscite che il sistema ha marcato come duplicati.
-          Se una è legittima, spunta la casella per riattivarla. La scelta vale per tutti gli utenti.
+          La prima e quella considerata dal sistema, se anche la seconda pensi che sia legittima spunta la casella per riattivarla.
+          In questa pagina dio non ti vede ma io sì, non far cazzate.
         </div>
       `;
       const filterHtml = athletesWithDups.length > 1 ? `
